@@ -1120,9 +1120,9 @@ void Application::initWidgetControllersAndCallbacks() {
         m_keyboardLayoutOsd.onLayoutChanged(m_compositorPlatform, m_configService.config());
       }
     }
-    m_idleManager.onSecondTick();
   });
   m_timeService.setPrecisionProvider([this]() { return timePrecisionNeeded(); });
+  m_timeService.setDeadlineProvider([this]() { return m_wallpaper.nextAutomationDeadline(); });
 
   if (m_pipewireService != nullptr) {
     m_audioOsd.suppressFor(std::chrono::milliseconds(2000));
@@ -1174,7 +1174,7 @@ TimeService::Precision Application::timePrecisionNeeded() const {
       || m_settingsWindow.wantsSecondTicks()) {
     return TimeService::Precision::Second;
   }
-  // Minute is the idle floor: the tick also advances wallpaper automation,
-  // settles minute-aligned clocks, and refreshes the idle-live status text.
+  // Minute is the idle floor: it settles minute-aligned clocks. Wallpaper
+  // automation wakes through its own deadline instead.
   return TimeService::Precision::Minute;
 }

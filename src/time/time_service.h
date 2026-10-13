@@ -2,6 +2,7 @@
 
 #include <chrono>
 #include <functional>
+#include <optional>
 
 // Fires a tick at the finest boundary any consumer currently needs. Consumers do
 // not subscribe individually; the owning application publishes a Precision, so
@@ -22,6 +23,9 @@ public:
     Second,
   };
   using PrecisionProvider = std::function<Precision()>;
+  // An absolute time a consumer must be ticked at, independent of the display
+  // boundary (e.g. a wallpaper rotation interval). nullopt means no deadline.
+  using DeadlineProvider = std::function<std::optional<TimePoint>()>;
 
   TimeService();
 
@@ -29,6 +33,9 @@ public:
   // Queried during every poll preparation, so a boundary is armed as soon as a
   // component starts or stops needing time ticks. Defaults to Minute.
   void setPrecisionProvider(PrecisionProvider provider);
+  // Also queried during every poll preparation. The poll wakes at whichever
+  // comes first: the precision boundary or the deadline's second boundary.
+  void setDeadlineProvider(DeadlineProvider provider);
 
   [[nodiscard]] int pollTimeoutMs() const;
   void tick();
@@ -40,6 +47,7 @@ private:
 
   TickCallback m_tickCallback;
   PrecisionProvider m_precisionProvider;
+  DeadlineProvider m_deadlineProvider;
   TimePoint m_now;
   SecondPoint m_nowSeconds;
 };

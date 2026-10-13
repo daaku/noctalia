@@ -1,5 +1,5 @@
 // Covers the demand-driven wake scheduling in TimeService: the poll timeout is
-// derived from the published Precision, and the tick callback fires only when a
+// derived from the published Precision and deadline, and the tick callback fires only when a
 // second boundary has actually elapsed.
 
 #include "test_check.h"
@@ -35,6 +35,35 @@ int main() {
     const int timeout = service.pollTimeoutMs();
     TEST_CHECK(timeout >= 1);
     TEST_CHECK(timeout <= 1000);
+  }
+
+  {
+    // A deadline pulls the wake forward to the end of the second it falls in
+    // (or earlier, when the minute boundary comes first).
+    TimeService service;
+    service.setDeadlineProvider([] { return system_clock::now() + milliseconds{2500}; });
+    const int timeout = service.pollTimeoutMs();
+    TEST_CHECK(timeout >= 1);
+    TEST_CHECK(timeout <= 3500);
+  }
+
+  {
+    // A deadline already due wakes at the next second boundary, never sooner,
+    // so it cannot spin the loop within the current second.
+    TimeService service;
+    service.setDeadlineProvider([] { return system_clock::now() - seconds{30}; });
+    const int timeout = service.pollTimeoutMs();
+    TEST_CHECK(timeout >= 1);
+    TEST_CHECK(timeout <= 1000);
+  }
+
+  {
+    // A deadline past the minute boundary does not delay it.
+    TimeService service;
+    service.setDeadlineProvider([] { return system_clock::now() + minutes{5}; });
+    const int timeout = service.pollTimeoutMs();
+    TEST_CHECK(timeout >= 1);
+    TEST_CHECK(timeout <= 60000);
   }
 
   {
