@@ -28,16 +28,18 @@ namespace {
 
 ClockWidget::ClockWidget(wl_output* /*output*/, Options options)
     : m_format(std::move(options.format)), m_verticalFormat(std::move(options.verticalFormat)),
-      m_tooltipFormat(std::move(options.tooltipFormat)), m_timezone(std::move(options.timezone)) {}
+      m_tooltipFormat(std::move(options.tooltipFormat)), m_timezone(std::move(options.timezone)),
+      m_labelShowsSeconds(formatShowsSeconds(m_format) || formatShowsSeconds(m_verticalFormat)),
+      m_tooltipShowsSeconds(formatShowsSeconds(m_tooltipFormat)) {}
 
 bool ClockWidget::wantsSecondTicks() const {
-  if (formatShowsSeconds(m_format) || formatShowsSeconds(m_verticalFormat)) {
+  if (m_labelShowsSeconds) {
     return true;
   }
   // Tooltip text is only regenerated on update, so a seconds-bearing tooltip
   // needs ticks while it can be showing, i.e. while the clock is hovered.
   const auto* area = static_cast<const InputArea*>(root());
-  return showsTooltip() && area != nullptr && area->hovered() && formatShowsSeconds(m_tooltipFormat);
+  return m_tooltipShowsSeconds && showsTooltip() && area != nullptr && area->hovered();
 }
 
 std::string ClockWidget::formatTimeText() const {
