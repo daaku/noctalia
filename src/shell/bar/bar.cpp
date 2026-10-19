@@ -23,7 +23,6 @@
 #include "shell/panel/panel_manager.h"
 #include "shell/surface/shadow.h"
 #include "shell/tooltip/tooltip_manager.h"
-#include "time/time_format.h"
 #include "ui/builders.h"
 #include "ui/palette.h"
 #include "ui/style.h"
@@ -1533,12 +1532,14 @@ BarServices Bar::services() const {
 void Bar::onSecondTick() {
   // Without a widget that renders seconds, a full bar update once a minute is
   // enough, so skip the other 59 ticks instead of re-laying out every surface.
-  const bool minuteBoundary = formatLocalTime("{:%S}") == "00";
+  const auto minute = std::chrono::floor<std::chrono::minutes>(std::chrono::system_clock::now());
+  const bool minuteChanged = minute != m_lastTickMinute;
+  m_lastTickMinute = minute;
   for (auto& inst : m_instances) {
     if (inst->surface == nullptr) {
       continue;
     }
-    if (!minuteBoundary && !instanceWantsSecondTicks(*inst)) {
+    if (!minuteChanged && !instanceWantsSecondTicks(*inst)) {
       continue;
     }
     inst->surface->requestUpdate();

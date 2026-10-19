@@ -9,6 +9,7 @@
 #include "ui/dialogs/layer_popup_host.h"
 #include "wayland/surface.h"
 
+#include <chrono>
 #include <functional>
 #include <memory>
 #include <optional>
@@ -202,6 +203,10 @@ private:
   scripting::ScriptApiContext* m_scriptApi = nullptr;
   std::unique_ptr<WidgetFactory> m_widgetFactory;
   std::vector<std::unique_ptr<BarInstance>> m_instances;
+  // Wall-clock minute of the last full second-tick update, so minute-changing
+  // widgets refresh on the first tick of a new minute even when it lands off
+  // the :00 boundary (after suspend, a clock step, or the lock screen).
+  std::chrono::sys_time<std::chrono::minutes> m_lastTickMinute;
 
   // Snapshot of the config fields the bar depends on. Used to skip reloads
   // triggered by unrelated config changes (theme, weather, idle, etc.).
