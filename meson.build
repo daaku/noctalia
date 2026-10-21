@@ -1297,7 +1297,6 @@ if build_tests
     'template_hook_runner',
     'theme_shell_mode',
     'time_format',
-    'time_service',
     'toplevel_thumbnail_capture',
     'tray_identifier',
     'ui_tree_reconciler',
