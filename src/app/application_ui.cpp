@@ -1118,9 +1118,6 @@ void Application::initWidgetControllersAndCallbacks() {
       m_desktopWidgetsController.onSecondTick();
       m_lockscreenWidgetsController.onSecondTick();
       m_settingsWindow.onSecondTick();
-      if (m_configService.config().osd.kinds.keyboardLayout) {
-        m_keyboardLayoutOsd.onLayoutChanged(m_compositorPlatform, m_configService.config());
-      }
     }
   });
   m_timeService.setPrecisionProvider([this]() { return timePrecisionNeeded(); });
