@@ -70,3 +70,8 @@ void TimeService::tick() {
     }
   }
 }
+
+void TimeService::forceTick() {
+  m_nowSeconds = {};
+  tick();
+}

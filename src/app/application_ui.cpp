@@ -361,6 +361,8 @@ void Application::initLockScreenAndSession() {
         m_hookManager.fire(HookKind::SessionUnlocked);
         releaseSleepDelayInhibitIfPending();
         requestAllSurfacesRedraw();
+        // The bar skipped ticks while locked; refresh it now rather than at the next minute.
+        DeferredCall::callLater([this]() { m_timeService.forceTick(); });
         if (m_logindService != nullptr) {
           m_logindService->setSessionLockedHint(false);
         }

@@ -39,6 +39,9 @@ public:
 
   [[nodiscard]] int pollTimeoutMs() const;
   void tick();
+  // Fires the tick callback now even within an already-ticked second. For wake paths
+  // (resume, unlock) where the scheduled boundary may be stale or the UI skipped ticks.
+  void forceTick();
 
   [[nodiscard]] TimePoint now() const noexcept { return m_now; }
 
