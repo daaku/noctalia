@@ -1026,6 +1026,7 @@ void Application::initAuxServicesAndHooks() {
 
   m_themeService.setChangeCallback([this]() {
     requestAllSurfacesRedraw();
+    m_bar.refresh();
     m_lockScreen.onThemeChanged();
     m_trayMenu.onThemeChanged();
     m_backdrop.onThemeChanged();
